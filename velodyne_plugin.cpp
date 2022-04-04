@@ -5,7 +5,9 @@
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
+#include "ros/advertise_options.h"
 #include "std_msgs/Float32.h"
+#include "sensor_msgs/LaserScan.h"
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/transport.hh>
@@ -91,6 +93,14 @@ ros::SubscribeOptions so =
       ros::VoidPtr(), &this->rosQueue);
 this->rosSub = this->rosNode->subscribe(so);
 
+ros::AdvertiseOptions ao = 
+  ros::AdvertiseOptions::create<sensor_msgs::LaserScan>(
+      "/" + this->model->GetName() + "/laser",
+      1,
+      boost::bind(&VelodynePlugin::pubMsg, this, _1),
+      ros::VoidPtr(), &this->rosQueue);
+this->rosPub = this->rosNode->advertise(ao);
+
 // Spin up the queue helper thread.
 this->rosQueueThread =
   std::thread(std::bind(&VelodynePlugin::QueueThread, this));
@@ -138,6 +148,8 @@ this->rosQueueThread =
 
     /// \brief A thread the keeps running the rosQueue
     private: std::thread rosQueueThread;
+
+    private:ros::Publisher rosPub;
     /// \brief Handle an incoming message from ROS
 /// \param[in] _msg A float value that is used to set the velocity
 /// of the Velodyne.
