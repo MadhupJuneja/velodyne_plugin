@@ -97,7 +97,7 @@ ros::AdvertiseOptions ao =
   ros::AdvertiseOptions::create<sensor_msgs::LaserScan>(
       "/" + this->model->GetName() + "/laser",
       1,
-      boost::bind(&VelodynePlugin::pubMsg, this, _1),
+      pubMsg(), pubMsgD(), 
       ros::VoidPtr(), &this->rosQueue);
 this->rosPub = this->rosNode->advertise(ao);
 
@@ -167,6 +167,8 @@ private: void QueueThread()
     this->rosQueue.callAvailable(ros::WallDuration(timeout));
   }
 }
+
+public void pubMsg()
   };
 
   // Tell Gazebo about this plugin, so that Gazebo can call Load on this plugin.
